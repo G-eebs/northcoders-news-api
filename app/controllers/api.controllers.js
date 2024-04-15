@@ -1,6 +1,5 @@
-const { selectEndpoints } = require("../models/api.models");
+const endpoints = require("../../endpoints.json");
 
 exports.getEndpoints = (req, res) => {
-	const endpoints = selectEndpoints();
 	res.status(200).send({ endpoints });
 };
