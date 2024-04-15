@@ -35,12 +35,49 @@ describe("/api/topics", () => {
 });
 
 describe("/api", () => {
-	test("GET:200 returns an object detailing all available endpoints", () => {
+	test("GET:200 sends an object detailing all available endpoints", () => {
 		return request(app)
 			.get("/api")
 			.expect(200)
 			.then(({ body: { endpoints } }) => {
 				expect(endpoints).toEqual(endpointsFile);
+			});
+	});
+});
+
+describe("/api/articles/:article_id", () => {
+	test("GET:200 sends the single article with specified id to the client", () => {
+		return request(app)
+			.get("/api/articles/3")
+			.expect(200)
+			.then(({ body: { article } }) => {
+				expect(article).toMatchObject({
+					article_id: 3,
+					title: "Eight pug gifs that remind me of mitch",
+					topic: "mitch",
+					author: "icellusedkars",
+					body: "some gifs",
+					created_at: "2020-11-03T09:12:00.000Z",
+					votes: 0,
+					article_img_url:
+						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+				});
+			});
+	});
+	test("GET:404 sends an appropriate status and error message when given a valid but non-existent id", () => {
+		return request(app)
+			.get("/api/articles/999")
+			.expect(404)
+			.then(({ body: { msg } }) => {
+				expect(msg).toBe("Not Found");
+			});
+	});
+	test("GET:400 sends an appropriate status and error message when given an invalid id", () => {
+		return request(app)
+			.get("/api/articles/invalid")
+			.expect(400)
+			.then(({ body: { msg } }) => {
+				expect(msg).toBe("Invalid Input");
 			});
 	});
 });
