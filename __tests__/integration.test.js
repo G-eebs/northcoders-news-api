@@ -200,6 +200,27 @@ describe("/api/articles/:article_id/comments", () => {
 					expect(comments).toContainEqual(expectedComment);
 				});
 		});
+		test("POST:201 ignores unnecessary properties on request body", () => {
+			return request(app)
+				.post("/api/articles/4/comments")
+				.send({
+					username: "rogersop",
+					body: "Fugiat molestiae iure et qui consequatur expedita quia. Est sed repellat nesciunt nulla sit in dolor laudantium. Totam vero et quam. In numquam magnam voluptas itaque. Quisquam vel vitae doloribus vel id laboriosam quibusdam.",
+					votes: 500,
+					permanent: true,
+				})
+				.expect(201)
+				.then(({ body: { postedComment } }) => {
+					expect(postedComment).toMatchObject({
+						comment_id: 19,
+						body: "Fugiat molestiae iure et qui consequatur expedita quia. Est sed repellat nesciunt nulla sit in dolor laudantium. Totam vero et quam. In numquam magnam voluptas itaque. Quisquam vel vitae doloribus vel id laboriosam quibusdam.",
+						article_id: 4,
+						author: "rogersop",
+						votes: 0,
+						created_at: expect.toBeString(),
+					});
+				});
+		});
 		test("POST:404 sends an appropriate status and error message when given a valid but non-existent article id", () => {
 			return request(app)
 				.post("/api/articles/999/comments")

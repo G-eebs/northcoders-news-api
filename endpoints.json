@@ -56,5 +56,22 @@
         }
 			]
 		}
+	},
+	"POST /api/articles/:article_id/comments": {
+		"description": "adds a new comment to the specified article and serves the posted comment back to the client",
+		"exampleRequest": {
+			"username": "butter_bridge",
+			"body": "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!"
+		},
+		"exampleResponse":  {
+      "postedComment": {
+				"comment_id": 19,
+				"body": "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+				"article_id": 4,
+				"author": "butter_bridge",
+				"votes": 0,
+				"created_at": "2020-04-06T13:17:00.000Z"
+			}
+		}
 	}
 }
