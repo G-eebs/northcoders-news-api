@@ -11,12 +11,10 @@ exports.handleCustomErrors = (err, req, res, next) => {
 };
 
 exports.handlePsqlErrors = (err, req, res, next) => {
-	if (err.code === "22P02") {
-		res.status(400).send({ msg: "Invalid id" });
-	} else if (err.code === "23503") {
+	if (err.code === "23503") {
 		res.status(404).send({ status: 404, msg: "Not Found" });
-	} else if (err.code === "23502") {
-		res.status(400).send({ status: 400, msg: "Incorrect input format" });
+	} else if (err.code === "22P02" || "23502") {
+		res.status(400).send({ msg: "Invalid Request" });
 	} else next(err);
 };
 
