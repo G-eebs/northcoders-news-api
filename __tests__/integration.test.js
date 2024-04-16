@@ -20,70 +20,76 @@ describe("Invalid endpoint", () => {
 });
 
 describe("/api/topics", () => {
-	test("GET:200 sends an array of topic objects to the client", () => {
-		return request(app)
-			.get("/api/topics")
-			.expect(200)
-			.then(({ body: { topics } }) => {
-				expect(topics.length).toBe(3);
-				topics.forEach((topic) => {
-					expect(topic).toHaveProperty("description", expect.any(String));
-					expect(topic).toHaveProperty("slug", expect.any(String));
+	describe("GET", () => {
+		test("GET:200 sends an array of topic objects to the client", () => {
+			return request(app)
+				.get("/api/topics")
+				.expect(200)
+				.then(({ body: { topics } }) => {
+					expect(topics.length).toBe(3);
+					topics.forEach((topic) => {
+						expect(topic).toHaveProperty("description", expect.any(String));
+						expect(topic).toHaveProperty("slug", expect.any(String));
+					});
 				});
-			});
+		});
 	});
 });
 
 describe("/api", () => {
-	test("GET:200 sends an object detailing all available endpoints", () => {
-		return request(app)
-			.get("/api")
-			.expect(200)
-			.then(({ body: { endpoints } }) => {
-				expect(endpoints).toEqual(endpointsFile);
-			});
+	describe("GET", () => {
+		test("GET:200 sends an object detailing all available endpoints", () => {
+			return request(app)
+				.get("/api")
+				.expect(200)
+				.then(({ body: { endpoints } }) => {
+					expect(endpoints).toEqual(endpointsFile);
+				});
+		});
 	});
 });
 
 describe("/api/articles/:article_id", () => {
-	test("GET:200 sends the single article with specified id to the client", () => {
-		return request(app)
-			.get("/api/articles/3")
-			.expect(200)
-			.then(({ body: { article } }) => {
-				expect(article).toMatchObject({
-					article_id: 3,
-					title: "Eight pug gifs that remind me of mitch",
-					topic: "mitch",
-					author: "icellusedkars",
-					body: "some gifs",
-					created_at: "2020-11-03T09:12:00.000Z",
-					votes: 0,
-					article_img_url:
-						"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+	describe("GET", () => {
+		test("GET:200 sends the single article with specified id to the client", () => {
+			return request(app)
+				.get("/api/articles/3")
+				.expect(200)
+				.then(({ body: { article } }) => {
+					expect(article).toMatchObject({
+						article_id: 3,
+						title: "Eight pug gifs that remind me of mitch",
+						topic: "mitch",
+						author: "icellusedkars",
+						body: "some gifs",
+						created_at: "2020-11-03T09:12:00.000Z",
+						votes: 0,
+						article_img_url:
+							"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+					});
 				});
-			});
-	});
-	test("GET:404 sends an appropriate status and error message when given a valid but non-existent id", () => {
-		return request(app)
-			.get("/api/articles/999")
-			.expect(404)
-			.then(({ body: { msg } }) => {
-				expect(msg).toBe("Not Found");
-			});
-	});
-	test("GET:400 sends an appropriate status and error message when given an invalid id", () => {
-		return request(app)
-			.get("/api/articles/invalid")
-			.expect(400)
-			.then(({ body: { msg } }) => {
-				expect(msg).toBe("Invalid Input");
-			});
+		});
+		test("GET:404 sends an appropriate status and error message when given a valid but non-existent id", () => {
+			return request(app)
+				.get("/api/articles/999")
+				.expect(404)
+				.then(({ body: { msg } }) => {
+					expect(msg).toBe("Not Found");
+				});
+		});
+		test("GET:400 sends an appropriate status and error message when given an invalid id", () => {
+			return request(app)
+				.get("/api/articles/invalid")
+				.expect(400)
+				.then(({ body: { msg } }) => {
+					expect(msg).toBe("Invalid id");
+				});
+		});
 	});
 });
 
 describe("/api/articles", () => {
-	describe("GET:200", () => {
+	describe("GET", () => {
 		test("GET:200 sends an array of article objects, with a comment count and no body property, to the client", () => {
 			return request(app)
 				.get("/api/articles")
@@ -117,7 +123,7 @@ describe("/api/articles", () => {
 });
 
 describe("/api/articles/:article_id/comments", () => {
-	describe("GET:200", () => {
+	describe("GET", () => {
 		test("GET:200 sends an array of all comments for the specified article id", () => {
 			return request(app)
 				.get("/api/articles/5/comments")
@@ -152,8 +158,6 @@ describe("/api/articles/:article_id/comments", () => {
 					expect(comments).toEqual([]);
 				});
 		});
-	});
-	describe("GET:Errors", () => {
 		test("GET:404 sends an appropriate status and error message when given a valid but non-existent id", () => {
 			return request(app)
 				.get("/api/articles/999/comments")
@@ -167,7 +171,95 @@ describe("/api/articles/:article_id/comments", () => {
 				.get("/api/articles/invalid/comments")
 				.expect(400)
 				.then(({ body: { msg } }) => {
-					expect(msg).toBe("Invalid Input");
+					expect(msg).toBe("Invalid id");
+				});
+		});
+	});
+	describe("POST", () => {
+		test("POST:201 adds a new comment to the specified article and sends the comment back to the client", () => {
+			const expectedComment = {
+				comment_id: 19,
+				body: "Fugiat molestiae iure et qui consequatur expedita quia. Est sed repellat nesciunt nulla sit in dolor laudantium. Totam vero et quam. In numquam magnam voluptas itaque. Quisquam vel vitae doloribus vel id laboriosam quibusdam.",
+				article_id: 4,
+				author: "rogersop",
+				votes: 0,
+				created_at: expect.toBeString(),
+			};
+			return request(app)
+				.post("/api/articles/4/comments")
+				.send({
+					username: "rogersop",
+					body: "Fugiat molestiae iure et qui consequatur expedita quia. Est sed repellat nesciunt nulla sit in dolor laudantium. Totam vero et quam. In numquam magnam voluptas itaque. Quisquam vel vitae doloribus vel id laboriosam quibusdam.",
+				})
+				.expect(201)
+				.then(({ body: { postedComment } }) => {
+					expect(postedComment).toMatchObject(expectedComment);
+					return request(app).get("/api/articles/4/comments").expect(200);
+				})
+				.then(({ body: { comments } }) => {
+					expect(comments).toContainEqual(expectedComment);
+				});
+		});
+		test("POST:404 sends an appropriate status and error message when given a valid but non-existent article id", () => {
+			return request(app)
+				.post("/api/articles/999/comments")
+				.send({
+					username: "rogersop",
+					body: "Fugiat molestiae iure et qui consequatur expedita quia. Est sed repellat nesciunt nulla sit in dolor laudantium. Totam vero et quam. In numquam magnam voluptas itaque. Quisquam vel vitae doloribus vel id laboriosam quibusdam.",
+				})
+				.expect(404)
+				.then(({ body: { msg } }) => {
+					expect(msg).toBe("Not Found");
+				});
+		});
+		test("POST:400 sends an appropriate status and error message when given an invalid article id", () => {
+			return request(app)
+				.post("/api/articles/invalid/comments")
+				.send({
+					username: "rogersop",
+					body: "Fugiat molestiae iure et qui consequatur expedita quia. Est sed repellat nesciunt nulla sit in dolor laudantium. Totam vero et quam. In numquam magnam voluptas itaque. Quisquam vel vitae doloribus vel id laboriosam quibusdam.",
+				})
+				.expect(400)
+				.then(({ body: { msg } }) => {
+					expect(msg).toBe("Invalid id");
+				});
+		});
+		test("POST:400 sends an appropriate status and error message when given a malformed comment object", () => {
+			return request(app)
+				.post("/api/articles/4/comments")
+				.send({
+					username: "rogersop",
+					comment:
+						"Fugiat molestiae iure et qui consequatur expedita quia. Est sed repellat nesciunt nulla sit in dolor laudantium. Totam vero et quam. In numquam magnam voluptas itaque. Quisquam vel vitae doloribus vel id laboriosam quibusdam.",
+				})
+				.expect(400)
+				.then(({ body: { msg } }) => {
+					expect(msg).toBe("Incorrect input format");
+				});
+		});
+		test("POST:400 sends an appropriate status and error message when given a comment object with incorrect data types", () => {
+			return request(app)
+				.post("/api/articles/4/comments")
+				.send({
+					username: 42785,
+					comment:
+						"Fugiat molestiae iure et qui consequatur expedita quia. Est sed repellat nesciunt nulla sit in dolor laudantium. Totam vero et quam. In numquam magnam voluptas itaque. Quisquam vel vitae doloribus vel id laboriosam quibusdam.",
+				})
+				.expect(400)
+				.then(({ body: { msg } }) => {
+					expect(msg).toBe("Incorrect input format");
+				});
+		});
+		test("POST:404 sends an appropriate status and error message when given a comment with a user that doesn't exist", () => {
+			return request(app)
+				.post("/api/articles/4/comments")
+				.send({
+					username: "grumpy19",
+					body: "Fugiat molestiae iure et qui consequatur expedita quia. Est sed repellat nesciunt nulla sit in dolor laudantium. Totam vero et quam. In numquam magnam voluptas itaque. Quisquam vel vitae doloribus vel id laboriosam quibusdam.",
+				})
+				.expect(404)
+				.then(({ body: { msg } }) => {
+					expect(msg).toBe("Not Found");
 				});
 		});
 	});
