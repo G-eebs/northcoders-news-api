@@ -83,33 +83,35 @@ describe("/api/articles/:article_id", () => {
 });
 
 describe("/api/articles/", () => {
-	test("GET:200 sends an array of article objects, with a comment count and no body property, to the client", () => {
-		return request(app)
-			.get("/api/articles")
-			.expect(200)
-			.then(({ body: { articles } }) => {
-				expect(articles.length).toBe(13);
-				articles.forEach((article) => {
-					expect(article).toMatchObject({
-						article_id: expect.toBeNumber(),
-						title: expect.toBeString(),
-						topic: expect.toBeString(),
-						author: expect.toBeString(),
-						created_at: expect.toBeString(),
-						votes: expect.toBeNumber(),
-						article_img_url: expect.toBeString(),
-						comment_count: expect.toBeString(),
+	describe("GET:200", () => {
+		test("GET:200 sends an array of article objects, with a comment count and no body property, to the client", () => {
+			return request(app)
+				.get("/api/articles")
+				.expect(200)
+				.then(({ body: { articles } }) => {
+					expect(articles.length).toBe(13);
+					articles.forEach((article) => {
+						expect(article).toMatchObject({
+							article_id: expect.toBeNumber(),
+							title: expect.toBeString(),
+							topic: expect.toBeString(),
+							author: expect.toBeString(),
+							created_at: expect.toBeString(),
+							votes: expect.toBeNumber(),
+							article_img_url: expect.toBeString(),
+							comment_count: expect.toBeString(),
+						});
+						expect(article).not.toHaveProperty("body");
 					});
-					expect(article).not.toHaveProperty("body");
 				});
-			});
-	});
-	test("GET:200 sent array should be ordered by date in descending order", () => {
-		return request(app)
-			.get("/api/articles")
-			.expect(200)
-			.then(({ body: { articles } }) => {
-				expect(articles).toBeSortedBy("created_at", { descending: true });
-			});
+		});
+		test("GET:200 sent array should be ordered by date in descending order", () => {
+			return request(app)
+				.get("/api/articles")
+				.expect(200)
+				.then(({ body: { articles } }) => {
+					expect(articles).toBeSortedBy("created_at", { descending: true });
+				});
+		});
 	});
 });
