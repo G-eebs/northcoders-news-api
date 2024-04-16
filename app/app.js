@@ -3,9 +3,11 @@ const { handleInvalidEndpoint, handleCustomErrors, handlePsqlErrors, handleServe
 const { getAllTopics } = require("./controllers/topics.controllers");
 const { getEndpoints } = require("./controllers/api.controllers");
 const { getArticleById, getAllArticles } = require("./controllers/articles.controllers");
-const { getArticleComments } = require("./controllers/comments.controllers");
+const { getArticleComments, postComment } = require("./controllers/comments.controllers");
 
 const app = express();
+
+app.use(express.json());
 
 app.get("/api/topics", getAllTopics);
 
@@ -15,7 +17,9 @@ app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles", getAllArticles);
 
-app.get("/api/articles/:article_id/comments", getArticleComments)
+app.get("/api/articles/:article_id/comments", getArticleComments);
+
+app.post("/api/articles/:article_id/comments", postComment);
 
 app.use(handleInvalidEndpoint);
 
