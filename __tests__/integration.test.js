@@ -98,8 +98,9 @@ describe("/api/articles/", () => {
 						created_at: expect.toBeString(),
 						votes: expect.toBeNumber(),
 						article_img_url: expect.toBeString(),
-						comment_count: expect.toBeString()
+						comment_count: expect.toBeString(),
 					});
+					expect(article).not.toHaveProperty("body");
 				});
 			});
 	});
@@ -108,7 +109,7 @@ describe("/api/articles/", () => {
 			.get("/api/articles")
 			.expect(200)
 			.then(({ body: { articles } }) => {
-				expect(articles).toBeSortedBy("created_at", {descending: true})
+				expect(articles).toBeSortedBy("created_at", { descending: true });
 			});
 	});
 });
