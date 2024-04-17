@@ -89,5 +89,8 @@
 				"created_at": "2020-04-06T13:17:00.000Z"
 			}
 		}
+	},
+	"DELETE /api/comments/:comment_id": {
+		"description": "removes the specified comment and serves no content back to the client"
 	}
 }

@@ -182,7 +182,7 @@ describe("Integration tests", () => {
 								created_at: expect.toBeString(),
 								votes: expect.toBeNumber(),
 								article_img_url: expect.toBeString(),
-								comment_count: expect.toBeString(),
+								comment_count: expect.toBeNumber(),
 							});
 							expect(article).not.toHaveProperty("body");
 						});
@@ -358,6 +358,48 @@ describe("Integration tests", () => {
 					.expect(404)
 					.then(({ body: { msg } }) => {
 						expect(msg).toBe("Not Found");
+					});
+			});
+		});
+	});
+
+	describe("/api/comments/:comment_id", () => {
+		describe("DELETE", () => {
+			test("DELETE:204 deletes the specified comment, returning no content", () => {
+				return request(app)
+					.delete("/api/comments/3")
+					.expect(204)
+					.then(({ text }) => {
+						expect(text).toBe("");
+					})
+					.then(() => {
+						return request(app).get("/api/articles/1/comments");
+					})
+					.then(({ body: { comments } }) => {
+						expect(comments).not.toContainEqual({
+							comment_id: 3,
+							body: "Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — onyou it works.",
+							article_id: 1,
+							author: "icellusedkars",
+							votes: 100,
+							created_at: "2020-03-01T01:13:00.000Z",
+						});
+					});
+			});
+			test("DELETE:404 sends an appropriate status and error message when given a valid but non-existent comment id", () => {
+				return request(app)
+					.delete("/api/comments/999")
+					.expect(404)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Comment Not Found");
+					});
+			});
+			test("DELETE:400 sends an appropriate status and error message when given an invalid comment id", () => {
+				return request(app)
+					.delete("/api/comments/invalid")
+					.expect(400)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Invalid Request");
 					});
 			});
 		});
