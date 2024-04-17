@@ -196,6 +196,25 @@ describe("Integration tests", () => {
 						expect(articles).toBeSortedBy("created_at", { descending: true });
 					});
 			});
+			test("GET:200 endpoint should accept a topic query which filters result to only the specified topic", () => {
+				return request(app)
+					.get("/api/articles?topic=cats")
+					.expect(200)
+					.then(({ body: { articles } }) => {
+						expect(articles.length).toBe(1);
+						articles.forEach(({ topic }) => {
+							expect(topic).toBe("cats");
+						});
+					});
+			});
+			test("GET:200 sends an empty array when provided with a topic that doesn't have any articles", () => {
+				return request(app)
+					.get("/api/articles?topic=dogs")
+					.expect(200)
+					.then(({ body: { articles } }) => {
+						expect(articles).toEqual([]);
+					});
+			});
 		});
 	});
 
