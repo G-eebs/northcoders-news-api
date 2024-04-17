@@ -404,4 +404,23 @@ describe("Integration tests", () => {
 			});
 		});
 	});
+	describe("/api/users", () => {
+		describe("GET", () => {
+			test("GET:200 sends an array of all user objects to the client", () => {
+				return request(app)
+					.get("/api/users")
+					.expect(200)
+					.then(({ body: { users } }) => {
+						expect(users.length).toBe(4);
+						users.forEach((user) => {
+							expect(user).toMatchObject({
+								username: expect.toBeString(),
+								name: expect.toBeString(),
+								avatar_url: expect.toBeString(),
+							});
+						});
+					});
+			});
+		});
+	});
 });
