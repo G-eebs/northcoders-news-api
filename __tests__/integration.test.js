@@ -20,6 +20,19 @@ describe("Integration tests", () => {
 		});
 	});
 
+	describe("/api", () => {
+		describe("GET", () => {
+			test("GET:200 sends an object detailing all available endpoints", () => {
+				return request(app)
+					.get("/api")
+					.expect(200)
+					.then(({ body: { endpoints } }) => {
+						expect(endpoints).toEqual(endpointsFile);
+					});
+			});
+		});
+	});
+
 	describe("/api/topics", () => {
 		describe("GET", () => {
 			test("GET:200 sends an array of topic objects to the client", () => {
@@ -37,14 +50,106 @@ describe("Integration tests", () => {
 		});
 	});
 
-	describe("/api", () => {
+	describe("/api/articles", () => {
 		describe("GET", () => {
-			test("GET:200 sends an object detailing all available endpoints", () => {
+			test("GET:200 sends an array of article objects, with a comment count and no body property, to the client", () => {
 				return request(app)
-					.get("/api")
+					.get("/api/articles")
 					.expect(200)
-					.then(({ body: { endpoints } }) => {
-						expect(endpoints).toEqual(endpointsFile);
+					.then(({ body: { articles } }) => {
+						expect(articles.length).toBe(13);
+						articles.forEach((article) => {
+							expect(article).toMatchObject({
+								article_id: expect.toBeNumber(),
+								title: expect.toBeString(),
+								topic: expect.toBeString(),
+								author: expect.toBeString(),
+								created_at: expect.toBeString(),
+								votes: expect.toBeNumber(),
+								article_img_url: expect.toBeString(),
+								comment_count: expect.toBeNumber(),
+							});
+							expect(article).not.toHaveProperty("body");
+						});
+					});
+			});
+			test("GET:200 sent array should be ordered by date in descending order", () => {
+				return request(app)
+					.get("/api/articles")
+					.expect(200)
+					.then(({ body: { articles } }) => {
+						expect(articles).toBeSortedBy("created_at", { descending: true });
+					});
+			});
+			test("GET:200 endpoint should accept a topic query which filters result to only the specified topic", () => {
+				return request(app)
+					.get("/api/articles?topic=cats")
+					.expect(200)
+					.then(({ body: { articles } }) => {
+						expect(articles.length).toBe(1);
+						articles.forEach(({ topic }) => {
+							expect(topic).toBe("cats");
+						});
+					});
+			});
+			test("GET:200 sends an empty array when provided with a topic that exists but doesn't have any articles", () => {
+				return request(app)
+					.get("/api/articles?topic=paper")
+					.expect(200)
+					.then(({ body: { articles } }) => {
+						expect(articles).toEqual([]);
+					});
+			});
+			test("GET:404 sends an appropriate status and error message when given a non-existent topic", () => {
+				return request(app)
+					.get("/api/articles?topic=dogs")
+					.expect(404)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Topic Not Found");
+					});
+			});
+			test("GET:200 endpoint should accept a sort_by query which sorts the result by any valid column", () => {
+				return request(app)
+					.get("/api/articles?sort_by=title")
+					.expect(200)
+					.then(({ body: { articles } }) => {
+						expect(articles).toBeSortedBy("title", { descending: true });
+					})
+					.then(() => {
+						return request(app)
+							.get("/api/articles?sort_by=comment_count")
+							.expect(200)
+							.then(({ body: { articles } }) => {
+								expect(articles).toBeSortedBy("comment_count", { descending: true });
+							});
+					});
+			});
+			test("GET:200 endpoint should accept a order query which sorts the results ascending or descending by the sorted column", () => {
+				return request(app)
+					.get("/api/articles?order=asc")
+					.expect(200)
+					.then(({ body: { articles } }) => {
+						expect(articles).toBeSortedBy("created_at", { descending: false });
+					})
+					.then(() => {
+						return request(app).get("/api/articles?sort_by=author&&order=asc").expect(200);
+					})
+					.then(({ body: { articles } }) => {
+						expect(articles).toBeSortedBy("author", { descending: false });
+					});
+			});
+			test("GET:400 sends an appropriate status and error message when given an invalid sort_by or order query", () => {
+				return request(app)
+					.get("/api/articles?sort_by=likes")
+					.expect(400)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Invalid Column");
+					})
+					.then(() => {
+						return request(app).get("/api/articles?order=biggest").expect(400);
+					})
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Invalid Order");
 					});
 			});
 		});
@@ -168,111 +273,6 @@ describe("Integration tests", () => {
 					.expect(400)
 					.then(({ body: { msg } }) => {
 						expect(msg).toBe("Invalid Request");
-					});
-			});
-		});
-	});
-
-	describe("/api/articles", () => {
-		describe("GET", () => {
-			test("GET:200 sends an array of article objects, with a comment count and no body property, to the client", () => {
-				return request(app)
-					.get("/api/articles")
-					.expect(200)
-					.then(({ body: { articles } }) => {
-						expect(articles.length).toBe(13);
-						articles.forEach((article) => {
-							expect(article).toMatchObject({
-								article_id: expect.toBeNumber(),
-								title: expect.toBeString(),
-								topic: expect.toBeString(),
-								author: expect.toBeString(),
-								created_at: expect.toBeString(),
-								votes: expect.toBeNumber(),
-								article_img_url: expect.toBeString(),
-								comment_count: expect.toBeNumber(),
-							});
-							expect(article).not.toHaveProperty("body");
-						});
-					});
-			});
-			test("GET:200 sent array should be ordered by date in descending order", () => {
-				return request(app)
-					.get("/api/articles")
-					.expect(200)
-					.then(({ body: { articles } }) => {
-						expect(articles).toBeSortedBy("created_at", { descending: true });
-					});
-			});
-			test("GET:200 endpoint should accept a topic query which filters result to only the specified topic", () => {
-				return request(app)
-					.get("/api/articles?topic=cats")
-					.expect(200)
-					.then(({ body: { articles } }) => {
-						expect(articles.length).toBe(1);
-						articles.forEach(({ topic }) => {
-							expect(topic).toBe("cats");
-						});
-					});
-			});
-			test("GET:200 sends an empty array when provided with a topic that exists but doesn't have any articles", () => {
-				return request(app)
-					.get("/api/articles?topic=paper")
-					.expect(200)
-					.then(({ body: { articles } }) => {
-						expect(articles).toEqual([]);
-					});
-			});
-			test("GET:404 sends an appropriate status and error message when given a non-existent topic", () => {
-				return request(app)
-					.get("/api/articles?topic=dogs")
-					.expect(404)
-					.then(({ body: { msg } }) => {
-						expect(msg).toBe("Topic Not Found");
-					});
-			});
-			test("GET:200 endpoint should accept a sort_by query which sorts the result by any valid column", () => {
-				return request(app)
-					.get("/api/articles?sort_by=title")
-					.expect(200)
-					.then(({ body: { articles } }) => {
-						expect(articles).toBeSortedBy("title", { descending: true });
-					})
-					.then(() => {
-						return request(app)
-							.get("/api/articles?sort_by=comment_count")
-							.expect(200)
-							.then(({ body: { articles } }) => {
-								expect(articles).toBeSortedBy("comment_count", { descending: true });
-							});
-					});
-			});
-			test("GET:200 endpoint should accept a order query which sorts the results ascending or descending by the sorted column", () => {
-				return request(app)
-					.get("/api/articles?order=asc")
-					.expect(200)
-					.then(({ body: { articles } }) => {
-						expect(articles).toBeSortedBy("created_at", { descending: false });
-					})
-					.then(() => {
-						return request(app).get("/api/articles?sort_by=author&&order=asc").expect(200);
-					})
-					.then(({ body: { articles } }) => {
-						expect(articles).toBeSortedBy("author", { descending: false });
-					});
-			});
-			test("GET:400 sends an appropriate status and error message when given an invalid sort_by or order query", () => {
-				return request(app)
-					.get("/api/articles?sort_by=likes")
-					.expect(400)
-					.then(({ body: { msg } }) => {
-						expect(msg).toBe("Invalid Column");
-					})
-					.then(() => {
-						return request(app).get("/api/articles?order=biggest").expect(400);
-					})
-					.then(({ body: { msg } }) => {
-						expect(msg).toBe("Invalid Order");
 					});
 			});
 		});
@@ -483,6 +483,7 @@ describe("Integration tests", () => {
 			});
 		});
 	});
+
 	describe("/api/users", () => {
 		describe("GET", () => {
 			test("GET:200 sends an array of all user objects to the client", () => {
@@ -498,6 +499,31 @@ describe("Integration tests", () => {
 								avatar_url: expect.toBeString(),
 							});
 						});
+					});
+			});
+		});
+	});
+
+	describe("/api/users/:username", () => {
+		describe("GET", () => {
+			test("GET:200 sends the specified user object to the client", () => {
+				return request(app)
+					.get("/api/users/rogersop")
+					.expect(200)
+					.then(({ body: { user } }) => {
+						expect(user).toMatchObject({
+							username: "rogersop",
+							name: "paul",
+							avatar_url: "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4",
+						});
+					});
+			});
+			test("GET:404 sends an appropriate status and error message when given a valid but non-existent username", () => {
+				return request(app)
+					.get("/api/users/existsnot")
+					.expect(404)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("User Not Found");
 					});
 			});
 		});
