@@ -231,6 +231,50 @@ describe("Integration tests", () => {
 						expect(msg).toBe("Topic Not Found");
 					});
 			});
+			test("GET:200 endpoint should accept a sort_by query which sorts the result by any valid column", () => {
+				return request(app)
+					.get("/api/articles?sort_by=title")
+					.expect(200)
+					.then(({ body: { articles } }) => {
+						expect(articles).toBeSortedBy("title", { descending: true });
+					})
+					.then(() => {
+						return request(app)
+							.get("/api/articles?sort_by=comment_count")
+							.expect(200)
+							.then(({ body: { articles } }) => {
+								expect(articles).toBeSortedBy("comment_count", { descending: true });
+							});
+					});
+			});
+			test("GET:200 endpoint should accept a order query which sorts the results ascending or descending by the sorted column", () => {
+				return request(app)
+					.get("/api/articles?order=asc")
+					.expect(200)
+					.then(({ body: { articles } }) => {
+						expect(articles).toBeSortedBy("created_at", { descending: false });
+					})
+					.then(() => {
+						return request(app).get("/api/articles?sort_by=author&&order=asc").expect(200);
+					})
+					.then(({ body: { articles } }) => {
+						expect(articles).toBeSortedBy("author", { descending: false });
+					});
+			});
+			test("GET:400 sends an appropriate status and error message when given an invalid sort_by or order query", () => {
+				return request(app)
+					.get("/api/articles?sort_by=likes")
+					.expect(400)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Invalid Column");
+					})
+					.then(() => {
+						return request(app).get("/api/articles?order=biggest").expect(400);
+					})
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Invalid Order");
+					});
+			});
 		});
 	});
 

@@ -17,8 +17,29 @@ exports.selectArticleById = (articleId) => {
 		});
 };
 
-exports.selectArticles = (topic) => {
+exports.selectArticles = (topic, sortBy = "created_at", order = "desc") => {
 	const queries = [];
+
+	const validSortBys = [
+		"article_id",
+		"title",
+		"topic",
+		"author",
+		"created_at",
+		"votes",
+		"article_img_url",
+		"comment_count",
+	];
+	if (!validSortBys.includes(sortBy)) {
+		return Promise.reject({ status: 400, msg: "Invalid Column" });
+	}
+	if (sortBy !== "comment_count") sortBy = "articles." + sortBy;
+
+	const validOrders = ["asc", "desc"]
+	if (!validOrders.includes(order)) {
+		return Promise.reject({ status: 400, msg: "Invalid Order" });
+	}
+	order = order.toUpperCase()
 
 	let sqlString = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id)::INT AS comment_count
   FROM articles 
@@ -31,7 +52,7 @@ exports.selectArticles = (topic) => {
 	}
 
 	sqlString += `GROUP BY articles.article_id
-	ORDER BY articles.created_at DESC`;
+	ORDER BY ${sortBy} ${order}`;
 
 	return db.query(sqlString, queries).then(({ rows }) => rows);
 };
