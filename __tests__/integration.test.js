@@ -70,6 +70,14 @@ describe("Integration tests", () => {
 						});
 					});
 			});
+			test("GET:200 article sent to client includes comment_count property", () => {
+				return request(app)
+					.get("/api/articles/3")
+					.expect(200)
+					.then(({ body: { article } }) => {
+						expect(article).toHaveProperty("comment_count", 2);
+					});
+			});
 			test("GET:404 sends an appropriate status and error message when given a valid but non-existent id", () => {
 				return request(app)
 					.get("/api/articles/999")
