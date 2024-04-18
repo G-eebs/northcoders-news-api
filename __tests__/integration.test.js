@@ -215,12 +215,20 @@ describe("Integration tests", () => {
 						});
 					});
 			});
-			test("GET:200 sends an empty array when provided with a topic that doesn't have any articles", () => {
+			test("GET:200 sends an empty array when provided with a topic that exists but doesn't have any articles", () => {
 				return request(app)
-					.get("/api/articles?topic=dogs")
+					.get("/api/articles?topic=paper")
 					.expect(200)
 					.then(({ body: { articles } }) => {
 						expect(articles).toEqual([]);
+					});
+			});
+			test("GET:404 sends an appropriate status and error message when given a non-existent topic", () => {
+				return request(app)
+					.get("/api/articles?topic=dogs")
+					.expect(404)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Topic Not Found");
 					});
 			});
 		});
