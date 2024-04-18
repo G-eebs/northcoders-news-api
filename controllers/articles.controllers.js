@@ -1,4 +1,10 @@
-const { selectArticleById, selectArticles, updateArticle } = require("../models/articles.models");
+const {
+	selectArticleById,
+	selectArticles,
+	updateArticle,
+	selectArticleComments,
+	createComment,
+} = require("../models/articles.models");
 const { topicExists } = require("../models/topics.models");
 
 exports.getArticleById = (req, res, next) => {
@@ -15,6 +21,25 @@ exports.getArticles = (req, res, next) => {
 	Promise.all([selectArticles(topic, sort_by, order), topicExists(topic)])
 		.then(([articles]) => {
 			res.status(200).send({ articles });
+		})
+		.catch(next);
+};
+
+exports.getArticleComments = (req, res, next) => {
+	const { article_id } = req.params;
+	Promise.all([selectArticleComments(article_id), selectArticleById(article_id)])
+		.then(([comments]) => {
+			res.status(200).send({ comments });
+		})
+		.catch(next);
+};
+
+exports.postComment = (req, res, next) => {
+	const { article_id } = req.params;
+	const newComment = req.body;
+	createComment(article_id, newComment)
+		.then((postedComment) => {
+			res.status(201).send({ postedComment });
 		})
 		.catch(next);
 };
