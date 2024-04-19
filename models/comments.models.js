@@ -7,7 +7,9 @@ exports.commentExists = (commentId) => {
 };
 
 exports.removeComment = (commentId) => {
-	return db.query(`DELETE FROM comments WHERE comment_id = $1`, [commentId]);
+	return db.query(`DELETE FROM comments WHERE comment_id = $1 RETURNING *`, [commentId]).then(({ rows }) => {
+		if(!rows.length) return Promise.reject({ status: 404, msg: "Comment Not Found" });
+	});
 };
 
 exports.updateComment = (commentId, { inc_votes }) => {
