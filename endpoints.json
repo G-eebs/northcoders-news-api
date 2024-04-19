@@ -16,7 +16,7 @@
 			"topic": "filters results to only include those of the specified topic",
 			"sort_by": "sorts the results by the specified column, defaults to created_at",
 			"order": "accepts `asc` or `desc`, sorts the results in ascending or descending order, defaults to descending"
-	},
+		},
 		"exampleResponse": {
 			"articles": [
 				{
@@ -30,6 +30,29 @@
 					"comment_count": 6
 				}
 			]
+		}
+	},
+	"POST /api/articles": {
+		"description": "adds a new article and serves the posted article with a comment count back to the client",
+		"exampleRequest": {
+			"title": "High Altitude Cooking",
+			"topic": "mitch",
+			"author": "butter_bridge",
+			"body": "Most backpacking trails vary only a few thousand feet elevation. However, many trails can be found above 10,000 feet. But what many people don’t take into consideration at these high altitudes is how these elevations affect their cooking.",
+			"article_img_url": "https://images.pexels.com/photos/691114/pexels-photo-691114.jpeg?w=700&h=700"
+		},
+		"exampleResponse": {
+			"postedArticle": {
+				"article_id": 14,
+				"title": "High Altitude Cooking",
+				"topic": "mitch",
+				"author": "butter_bridge",
+				"body": "Most backpacking trails vary only a few thousand feet elevation. However, many trails can be found above 10,000 feet. But what many people don’t take into consideration at these high altitudes is how these elevations affect their cooking.",
+				"created_at": "2020-09-16T16:48:00.000Z",
+				"votes": 0,
+				"article_img_url": "https://images.pexels.com/photos/691114/pexels-photo-691114.jpeg?w=700&h=700",
+				"comment_count": 0
+			}
 		}
 	},
 	"GET /api/articles/:article_id": {
@@ -103,11 +126,13 @@
 		"description": "serves an array of all users",
 		"queries": [],
 		"exampleResponse": {
-			"users": [{
-        "username": "butter_bridge",
-        "name": "jonny",
-        "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
-      }]
+			"users": [
+				{
+					"username": "butter_bridge",
+					"name": "jonny",
+					"avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+				}
+			]
 		}
 	}
 }

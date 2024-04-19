@@ -153,6 +153,126 @@ describe("Integration tests", () => {
 					});
 			});
 		});
+		describe("POST", () => {
+			test("POST:201 adds a new article and sends the posted article with a comment count back to the client", () => {
+				const expectedArticle = {
+					article_id: 14,
+					title: "High Altitude Cooking",
+					topic: "mitch",
+					author: "butter_bridge",
+					body: "Most backpacking trails vary only a few thousand feet elevation. However, many trails can be found above 10,000 feet. But what many people don’t take into consideration at these high altitudes is how these elevations affect their cooking.",
+					created_at: expect.toBeString(),
+					votes: 0,
+					article_img_url: "https://images.pexels.com/photos/691114/pexels-photo-691114.jpeg?w=700&h=700",
+					comment_count: 0,
+				};
+				return request(app)
+					.post("/api/articles")
+					.send({
+						title: "High Altitude Cooking",
+						topic: "mitch",
+						author: "butter_bridge",
+						body: "Most backpacking trails vary only a few thousand feet elevation. However, many trails can be found above 10,000 feet. But what many people don’t take into consideration at these high altitudes is how these elevations affect their cooking.",
+						article_img_url: "https://images.pexels.com/photos/691114/pexels-photo-691114.jpeg?w=700&h=700",
+					})
+					.expect(201)
+					.then(({ body: { postedArticle } }) => {
+						expect(postedArticle).toMatchObject(expectedArticle);
+						return request(app).get("/api/articles/14").expect(200);
+					})
+					.then(({ body: { article } }) => {
+						expect(article).toEqual(expectedArticle);
+					});
+			});
+			test("POST:201 adds a new article with the default article_img_url when not provided one", () => {
+				return request(app)
+					.post("/api/articles")
+					.send({
+						title: "High Altitude Cooking",
+						topic: "mitch",
+						author: "butter_bridge",
+						body: "Most backpacking trails vary only a few thousand feet elevation. However, many trails can be found above 10,000 feet. But what many people don’t take into consideration at these high altitudes is how these elevations affect their cooking.",
+					})
+					.expect(201)
+					.then(({ body: { postedArticle } }) => {
+						expect(postedArticle).toHaveProperty(
+							"article_img_url",
+							"https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+						);
+					});
+			});
+			test("POST:201 ignores unnecessary properties on request body", () => {
+				return request(app)
+					.post("/api/articles")
+					.send({
+						title: "High Altitude Cooking",
+						topic: "mitch",
+						author: "butter_bridge",
+						body: "Most backpacking trails vary only a few thousand feet elevation. However, many trails can be found above 10,000 feet. But what many people don’t take into consideration at these high altitudes is how these elevations affect their cooking.",
+						article_img_url: "https://images.pexels.com/photos/691114/pexels-photo-691114.jpeg?w=700&h=700",
+						friends: 500,
+						votes: 60,
+						comment_count: 7,
+						tags: "interesting, outdoor",
+					})
+					.expect(201)
+					.then(({ body: { postedArticle } }) => {
+						expect(postedArticle).toMatchObject({
+							article_id: 14,
+							title: "High Altitude Cooking",
+							topic: "mitch",
+							author: "butter_bridge",
+							body: "Most backpacking trails vary only a few thousand feet elevation. However, many trails can be found above 10,000 feet. But what many people don’t take into consideration at these high altitudes is how these elevations affect their cooking.",
+							created_at: expect.toBeString(),
+							votes: 0,
+							article_img_url: "https://images.pexels.com/photos/691114/pexels-photo-691114.jpeg?w=700&h=700",
+							comment_count: 0,
+						});
+					});
+			});
+			test("POST:400 sends an appropriate status and error message when given a malformed article object", () => {
+				return request(app)
+					.post("/api/articles")
+					.send({
+						topic: "mitch",
+						author: "butter_bridge",
+						body: "Most backpacking trails vary only a few thousand feet elevation. However, many trails can be found above 10,000 feet. But what many people don’t take into consideration at these high altitudes is how these elevations affect their cooking.",
+						article_img_url: "https://images.pexels.com/photos/691114/pexels-photo-691114.jpeg?w=700&h=700",
+					})
+					.expect(400)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Invalid Request");
+					});
+			});
+			test("POST:404 sends an appropriate status and error message when given an article with a topic or user that doesn't exist", () => {
+				return request(app)
+					.post("/api/articles")
+					.send({
+						title: "High Altitude Cooking",
+						topic: "cooking",
+						author: "butter_bridge",
+						body: "Most backpacking trails vary only a few thousand feet elevation. However, many trails can be found above 10,000 feet. But what many people don’t take into consideration at these high altitudes is how these elevations affect their cooking.",
+						article_img_url: "https://images.pexels.com/photos/691114/pexels-photo-691114.jpeg?w=700&h=700",
+					})
+					.expect(404)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Not Found");
+						return request(app)
+							.post("/api/articles")
+							.send({
+								title: "High Altitude Cooking",
+								topic: "mitch",
+								author: "mitch",
+								body: "Most backpacking trails vary only a few thousand feet elevation. However, many trails can be found above 10,000 feet. But what many people don’t take into consideration at these high altitudes is how these elevations affect their cooking.",
+								article_img_url: "https://images.pexels.com/photos/691114/pexels-photo-691114.jpeg?w=700&h=700",
+							})
+							.expect(404);
+					})
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Not Found");
+					});
+			});
+		});
 	});
 
 	describe("/api/articles/:article_id", () => {
@@ -386,7 +506,7 @@ describe("Integration tests", () => {
 					})
 					.expect(404)
 					.then(({ body: { msg } }) => {
-						expect(msg).toBe("ID Not Found");
+						expect(msg).toBe("Not Found");
 					});
 			});
 			test("POST:400 sends an appropriate status and error message when given an invalid article id", () => {
@@ -436,7 +556,7 @@ describe("Integration tests", () => {
 					})
 					.expect(404)
 					.then(({ body: { msg } }) => {
-						expect(msg).toBe("ID Not Found");
+						expect(msg).toBe("Not Found");
 					});
 			});
 		});
