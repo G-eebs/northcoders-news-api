@@ -35,11 +35,11 @@ exports.selectArticles = (topic, sortBy = "created_at", order = "desc") => {
 	}
 	if (sortBy !== "comment_count") sortBy = "articles." + sortBy;
 
-	const validOrders = ["asc", "desc"]
+	const validOrders = ["asc", "desc"];
 	if (!validOrders.includes(order)) {
 		return Promise.reject({ status: 400, msg: "Invalid Order" });
 	}
-	order = order.toUpperCase()
+	order = order.toUpperCase();
 
 	let sqlString = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id)::INT AS comment_count
   FROM articles 
@@ -90,4 +90,23 @@ exports.updateArticle = (articleId, { inc_votes }) => {
 		.then(({ rows: { 0: updatedArticle } }) => {
 			return updatedArticle;
 		});
+};
+
+exports.createArticle = ({ title, topic, author, body, article_img_url }) => {
+	const sqlValues = [title, topic, author, body];
+
+	let sqlString = `INSERT INTO articles 
+	(title, topic, author, body, article_img_url)
+	VALUES
+	($1, $2, $3, $4,`;
+
+	if (article_img_url) {
+		(sqlString += ` $5)`), sqlValues.push(article_img_url);
+	} else sqlString += ` DEFAULT)`;
+	sqlString += ` RETURNING *`;
+
+	return db.query(sqlString, sqlValues).then(({ rows: { 0: postedArticle } }) => {
+		postedArticle.comment_count = 0;
+		return postedArticle;
+	});
 };
