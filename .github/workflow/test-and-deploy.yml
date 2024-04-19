@@ -6,7 +6,18 @@ on:
 
 jobs:
   greeting:
+    name: greeting
     runs-on: ubuntu-latest
     steps:
       - name: Say hello
         run: echo "Hello!"
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        uses: npm ci
+      - name: Run utils tests
+        uses: npm t utils
