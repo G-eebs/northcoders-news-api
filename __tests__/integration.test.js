@@ -482,6 +482,76 @@ describe("Integration tests", () => {
 					});
 			});
 		});
+		describe("PATCH", () => {
+			test("PATCH:200 increases or decreases the specified comment's vote count by the requested amount, returning the updated article", () => {
+				return request(app)
+					.patch("/api/comments/2")
+					.send({ inc_votes: 1 })
+					.expect(200)
+					.then(({ body: { updatedComment } }) => {
+						expect(updatedComment).toMatchObject({
+							comment_id: 2,
+							body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+							article_id: 1,
+							author: "butter_bridge",
+							votes: 15,
+							created_at: "2020-10-31T03:03:00.000Z",
+						});
+					});
+			});
+			test("PATCH:200 ignores unnecessary properties on the request object", () => {
+				return request(app)
+					.patch("/api/comments/1")
+					.send({ inc_votes: -3, fame: 50, change_author: "Dan" })
+					.expect(200)
+					.then(({ body: { updatedComment } }) => {
+						expect(updatedComment).toMatchObject({
+							comment_id: 1,
+							body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+							article_id: 9,
+							author: "butter_bridge",
+							votes: 13,
+							created_at: "2020-04-06T12:17:00.000Z",
+						});
+					});
+			});
+			test("PATCH:404 sends an appropriate status and error message when given a valid but non-existent comment id", () => {
+				return request(app)
+					.patch("/api/comments/999")
+					.send({ inc_votes: 6 })
+					.expect(404)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Comment Not Found");
+					});
+			});
+			test("PATCH:400 sends an appropriate status and error message when given an invalid comment id", () => {
+				return request(app)
+					.patch("/api/comments/invalid")
+					.send({ inc_votes: 6 })
+					.expect(400)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Invalid Request");
+					});
+			});
+			test("PATCH:400 sends an appropriate status and error message when given a malformed votes object", () => {
+				return request(app)
+					.patch("/api/comments/2")
+					.send({ inc_vowtes: 6 })
+					.expect(400)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Invalid Request");
+					});
+			});
+			test("PATCH:400 sends an appropriate status and error message when given a votes object with incorrect data types", () => {
+				return request(app)
+					.patch("/api/comments/2")
+					.send({ inc_votes: "inc by 6" })
+					.expect(400)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Invalid Request");
+					});
+			});
+		});
 	});
 
 	describe("/api/users", () => {
