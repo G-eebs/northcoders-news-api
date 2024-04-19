@@ -15,7 +15,7 @@ describe("Integration tests", () => {
 				.get("/invalid-endpoint")
 				.expect(404)
 				.then(({ body: { msg } }) => {
-					expect(msg).toBe("Not Found");
+					expect(msg).toBe("Endpoint Not Found");
 				});
 		});
 	});
@@ -188,7 +188,7 @@ describe("Integration tests", () => {
 					.get("/api/articles/999")
 					.expect(404)
 					.then(({ body: { msg } }) => {
-						expect(msg).toBe("Not Found");
+						expect(msg).toBe("Article Not Found");
 					});
 			});
 			test("GET:400 sends an appropriate status and error message when given an invalid id", () => {
@@ -245,7 +245,7 @@ describe("Integration tests", () => {
 					.send({ inc_votes: 8 })
 					.expect(404)
 					.then(({ body: { msg } }) => {
-						expect(msg).toBe("Not Found");
+						expect(msg).toBe("Article Not Found");
 					});
 			});
 			test("PATCH:400 sends an appropriate status and error message when given an invalid article id", () => {
@@ -319,7 +319,7 @@ describe("Integration tests", () => {
 					.get("/api/articles/999/comments")
 					.expect(404)
 					.then(({ body: { msg } }) => {
-						expect(msg).toBe("Not Found");
+						expect(msg).toBe("Article Not Found");
 					});
 			});
 			test("GET:400 sends an appropriate status and error message when given an invalid id", () => {
@@ -386,7 +386,7 @@ describe("Integration tests", () => {
 					})
 					.expect(404)
 					.then(({ body: { msg } }) => {
-						expect(msg).toBe("Not Found");
+						expect(msg).toBe("ID Not Found");
 					});
 			});
 			test("POST:400 sends an appropriate status and error message when given an invalid article id", () => {
@@ -436,7 +436,7 @@ describe("Integration tests", () => {
 					})
 					.expect(404)
 					.then(({ body: { msg } }) => {
-						expect(msg).toBe("Not Found");
+						expect(msg).toBe("ID Not Found");
 					});
 			});
 		});
