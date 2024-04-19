@@ -2,7 +2,7 @@ const { removeComment, commentExists, updateComment } = require("../models/comme
 
 exports.deleteComment = (req, res, next) => {
 	const { comment_id } = req.params;
-	Promise.all([removeComment(comment_id), commentExists(comment_id)])
+	removeComment(comment_id)
 		.then(() => {
 			res.status(204).send();
 		})
