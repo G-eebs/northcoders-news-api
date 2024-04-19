@@ -6,7 +6,7 @@ on:
 
 jobs:
   greeting:
-    name: greeting
+    name: Greeting
     runs-on: ubuntu-latest
     steps:
       - name: Say hello
@@ -29,3 +29,10 @@ jobs:
           postgresql password: 'test_password'
       - name: Run integration tests
         run: PGDATABASE=my_db PGUSER=test_user PGPASSWORD=test_password npm t integration
+  deploy:
+    name: Deploy
+    needs: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Render
+        run: curl ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
