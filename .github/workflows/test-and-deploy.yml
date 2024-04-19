@@ -18,6 +18,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Install dependencies
-        uses: npm ci
+        run: npm ci
       - name: Run utils tests
-        uses: npm t utils
+        run: npm t utils
