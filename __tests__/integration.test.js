@@ -157,7 +157,7 @@ describe("Integration tests", () => {
 					.expect(200)
 					.then(({ body: { articles } }) => {
 						expect(articles.length).toBe(10)
-						expect(articles[0]).toEqual({
+						expect(articles[0]).toMatchObject({
 							article_id: 3,
 							title: 'Eight pug gifs that remind me of mitch',
 							topic: 'mitch',
@@ -173,6 +173,24 @@ describe("Integration tests", () => {
 							topic: 'mitch',
 							author: 'rogersop',
 							created_at: '2020-05-06T01:14:00.000Z',
+							votes: 0,
+							article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+							comment_count: 0
+						})
+					})
+			})
+			test("GET:200 endpoint should accept limit and p queries defining the number of results per page and the page number to return", () => {
+				return request(app)
+					.get("/api/articles?limit=4&p=2")
+					.expect(200)
+					.then(({ body: { articles } }) => {
+						expect(articles.length).toBe(4)
+						expect(articles[0]).toMatchObject({
+							article_id: 13,
+							title: 'Another article about Mitch',
+							topic: 'mitch',
+							author: 'butter_bridge',
+							created_at: '2020-10-11T11:24:00.000Z',
 							votes: 0,
 							article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
 							comment_count: 0
