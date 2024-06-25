@@ -197,6 +197,14 @@ describe("Integration tests", () => {
 						})
 					})
 			})
+			test("GET:200 endpoint includes a total_count property in returned object with the total number of articles with the applied filters", () => {
+				return request(app)
+				.get("/api/articles")
+				.expect(200)
+				.then(({ body: { total_count } }) => { 
+					expect(total_count).toBe(13)
+				})
+			})
 		});
 		describe("POST", () => {
 			test("POST:201 adds a new article and sends the posted article with a comment count back to the client", () => {

@@ -55,9 +55,12 @@ exports.selectArticles = (topic, sortBy = "created_at", order = "desc", limit = 
 	ORDER BY ${sortBy} ${order}`;
 
 	return db.query(sqlString, queries).then(({ rows }) => {
-		const pages = Math.ceil(rows.length / limit)
+		const pages = Math.ceil(rows.length / limit);
+
+		const articles = rows.slice((p - 1) * limit, Math.min(p * limit, rows.length));
+		const total_count = rows.length;
 		
-		return rows.slice((p-1)*limit, Math.min(p*limit, rows.length));
+		return { articles, total_count };
 	});
 };
 
