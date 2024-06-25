@@ -20,8 +20,8 @@ exports.getArticleById = (req, res, next) => {
 exports.getArticles = (req, res, next) => {
 	const { topic, sort_by, order, limit, p } = req.query;
 	Promise.all([selectArticles(topic, sort_by, order, limit, p), topicExists(topic)])
-		.then(([articles]) => {
-			res.status(200).send({ articles });
+		.then(([{ articles, total_count }]) => {
+			res.status(200).send({ articles, total_count });
 		})
 		.catch(next);
 };
@@ -61,5 +61,5 @@ exports.postArticle = (req, res, next) => {
 		.then((postedArticle) => {
 			res.status(201).send({ postedArticle });
 		})
-	.catch(next);
+		.catch(next);
 };
