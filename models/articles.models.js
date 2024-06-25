@@ -17,7 +17,7 @@ exports.selectArticleById = (articleId) => {
 		});
 };
 
-exports.selectArticles = (topic, sortBy = "created_at", order = "desc") => {
+exports.selectArticles = (topic, sortBy = "created_at", order = "desc", limit = 10, p = 1) => {
 	const queries = [];
 
 	const validSortBys = [
@@ -54,7 +54,9 @@ exports.selectArticles = (topic, sortBy = "created_at", order = "desc") => {
 	sqlString += `GROUP BY articles.article_id
 	ORDER BY ${sortBy} ${order}`;
 
-	return db.query(sqlString, queries).then(({ rows }) => rows);
+	return db.query(sqlString, queries).then(({ rows }) => {
+		return rows.slice(0, Math.min(10,rows.length));
+	});
 };
 
 exports.selectArticleComments = (articleId) => {
