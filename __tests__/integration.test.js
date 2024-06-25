@@ -57,7 +57,6 @@ describe("Integration tests", () => {
 					.get("/api/articles")
 					.expect(200)
 					.then(({ body: { articles } }) => {
-						expect(articles.length).toBe(13);
 						articles.forEach((article) => {
 							expect(article).toMatchObject({
 								article_id: expect.toBeNumber(),
@@ -152,6 +151,34 @@ describe("Integration tests", () => {
 						expect(msg).toBe("Invalid Order");
 					});
 			});
+			test("GET:200 endpoint should paginate results with a default limit of 10 results and a default page of 1", () => {
+				return request(app)
+					.get("/api/articles")
+					.expect(200)
+					.then(({ body: { articles } }) => {
+						expect(articles.length).toBe(10)
+						expect(articles[0]).toEqual({
+							article_id: 3,
+							title: 'Eight pug gifs that remind me of mitch',
+							topic: 'mitch',
+							author: 'icellusedkars',
+							created_at: '2020-11-03T09:12:00.000Z',
+							votes: 0,
+							article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+							comment_count: 2
+						})
+						expect(articles[articles.length-1]).toEqual({
+							article_id: 4,
+							title: 'Student SUES Mitch!',
+							topic: 'mitch',
+							author: 'rogersop',
+							created_at: '2020-05-06T01:14:00.000Z',
+							votes: 0,
+							article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+							comment_count: 0
+						})
+					})
+			})
 		});
 		describe("POST", () => {
 			test("POST:201 adds a new article and sends the posted article with a comment count back to the client", () => {
