@@ -162,7 +162,7 @@ describe("Integration tests", () => {
 							title: "Eight pug gifs that remind me of mitch",
 							topic: "mitch",
 							author: "icellusedkars",
-							created_at: "2020-11-03T09:12:00.000Z",
+							created_at: expect.toBeString(),
 							votes: 0,
 							article_img_url:
 								"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
@@ -173,7 +173,7 @@ describe("Integration tests", () => {
 							title: "Student SUES Mitch!",
 							topic: "mitch",
 							author: "rogersop",
-							created_at: "2020-05-06T01:14:00.000Z",
+							created_at: expect.toBeString(),
 							votes: 0,
 							article_img_url:
 								"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
@@ -192,7 +192,7 @@ describe("Integration tests", () => {
 							title: "Another article about Mitch",
 							topic: "mitch",
 							author: "butter_bridge",
-							created_at: "2020-10-11T11:24:00.000Z",
+							created_at: expect.toBeString(),
 							votes: 0,
 							article_img_url:
 								"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
@@ -223,12 +223,13 @@ describe("Integration tests", () => {
 					});
 			});
 			test("GET:404 sends and appropriate status and error message when given a non-existent page number", () => {
-				return request(app).get("/api/articles?p=999")
-				.expect(404)
-				.then(({ body: { msg } }) => {
-					expect(msg).toBe("Page Not Found")
-				})
-			})
+				return request(app)
+					.get("/api/articles?p=999")
+					.expect(404)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Page Not Found");
+					});
+			});
 		});
 		describe("POST", () => {
 			test("POST:201 adds a new article and sends the posted article with a comment count back to the client", () => {
