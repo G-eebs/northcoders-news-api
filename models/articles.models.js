@@ -55,11 +55,20 @@ exports.selectArticles = (topic, sortBy = "created_at", order = "desc", limit = 
 	ORDER BY ${sortBy} ${order}`;
 
 	return db.query(sqlString, queries).then(({ rows }) => {
-		const pages = Math.ceil(rows.length / limit);
+		if (!Number.isInteger(+limit) || +limit < 1) {
+			return Promise.reject({ status: 400, msg: "Invalid Limit" });
+		}
+		if (!Number.isInteger(+p) || +p < 1) {
+			return Promise.reject({ status: 400, msg: "Invalid Page" });
+		}
+		const pages = Math.max(1, Math.ceil(rows.length / limit));
+		if (p > pages) {
+			return Promise.reject({ status: 404, msg: "Page Not Found" });
+		}
 
 		const articles = rows.slice((p - 1) * limit, Math.min(p * limit, rows.length));
 		const total_count = rows.length;
-		
+
 		return { articles, total_count };
 	});
 };
