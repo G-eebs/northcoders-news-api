@@ -156,53 +156,77 @@ describe("Integration tests", () => {
 					.get("/api/articles")
 					.expect(200)
 					.then(({ body: { articles } }) => {
-						expect(articles.length).toBe(10)
+						expect(articles.length).toBe(10);
 						expect(articles[0]).toMatchObject({
 							article_id: 3,
-							title: 'Eight pug gifs that remind me of mitch',
-							topic: 'mitch',
-							author: 'icellusedkars',
-							created_at: '2020-11-03T09:12:00.000Z',
+							title: "Eight pug gifs that remind me of mitch",
+							topic: "mitch",
+							author: "icellusedkars",
+							created_at: "2020-11-03T09:12:00.000Z",
 							votes: 0,
-							article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
-							comment_count: 2
-						})
-						expect(articles[articles.length-1]).toEqual({
+							article_img_url:
+								"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+							comment_count: 2,
+						});
+						expect(articles[articles.length - 1]).toEqual({
 							article_id: 4,
-							title: 'Student SUES Mitch!',
-							topic: 'mitch',
-							author: 'rogersop',
-							created_at: '2020-05-06T01:14:00.000Z',
+							title: "Student SUES Mitch!",
+							topic: "mitch",
+							author: "rogersop",
+							created_at: "2020-05-06T01:14:00.000Z",
 							votes: 0,
-							article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
-							comment_count: 0
-						})
-					})
-			})
+							article_img_url:
+								"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+							comment_count: 0,
+						});
+					});
+			});
 			test("GET:200 endpoint should accept limit and p queries defining the number of results per page and the page number to return", () => {
 				return request(app)
 					.get("/api/articles?limit=4&p=2")
 					.expect(200)
 					.then(({ body: { articles } }) => {
-						expect(articles.length).toBe(4)
+						expect(articles.length).toBe(4);
 						expect(articles[0]).toMatchObject({
 							article_id: 13,
-							title: 'Another article about Mitch',
-							topic: 'mitch',
-							author: 'butter_bridge',
-							created_at: '2020-10-11T11:24:00.000Z',
+							title: "Another article about Mitch",
+							topic: "mitch",
+							author: "butter_bridge",
+							created_at: "2020-10-11T11:24:00.000Z",
 							votes: 0,
-							article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
-							comment_count: 0
-						})
-					})
-			})
+							article_img_url:
+								"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+							comment_count: 0,
+						});
+					});
+			});
 			test("GET:200 endpoint includes a total_count property in returned object with the total number of articles with the applied filters", () => {
 				return request(app)
-				.get("/api/articles")
-				.expect(200)
-				.then(({ body: { total_count } }) => { 
-					expect(total_count).toBe(13)
+					.get("/api/articles")
+					.expect(200)
+					.then(({ body: { total_count } }) => {
+						expect(total_count).toBe(13);
+					});
+			});
+			test("GET:400 sends an appropriate status and error message when given an invalid limit or page", () => {
+				return request(app)
+					.get("/api/articles?limit=invalid")
+					.expect(400)
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Invalid Limit");
+					})
+					.then(() => {
+						return request(app).get("/api/articles?p=invalid").expect(400);
+					})
+					.then(({ body: { msg } }) => {
+						expect(msg).toBe("Invalid Page");
+					});
+			});
+			test("GET:404 sends and appropriate status and error message when given a non-existent page number", () => {
+				return request(app).get("/api/articles?p=999")
+				.expect(404)
+				.then(({ body: { msg } }) => {
+					expect(msg).toBe("Page Not Found")
 				})
 			})
 		});
