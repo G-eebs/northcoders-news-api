@@ -10,12 +10,14 @@
 		}
 	},
 	"GET /api/articles": {
-		"description": "serves an array of all articles",
-		"queries": ["author", "topic", "sort_by", "order"],
+		"description": "serves an array of articles and the total number of articles per provided filters",
+		"queries": ["author", "topic", "sort_by", "order", "limit", "p"],
 		"queryDetails": {
 			"topic": "filters results to only include those of the specified topic",
 			"sort_by": "sorts the results by the specified column, defaults to created_at",
-			"order": "accepts `asc` or `desc`, sorts the results in ascending or descending order, defaults to descending"
+			"order": "accepts `asc` or `desc`, sorts the results in ascending or descending order, defaults to descending",
+			"limit" : "sets the number of articles per page, defaults to 10",
+			"p": "sets the page number to return based on the limit, defaults to 1"
 		},
 		"exampleResponse": {
 			"articles": [
@@ -29,7 +31,8 @@
 					"article_img_url": "https://images.pexels.com/photos/1267320/pexels-photo-1267320.jpeg?w=700&h=700",
 					"comment_count": 6
 				}
-			]
+			],
+			"total_count": 37
 		}
 	},
 	"POST /api/articles": {
