@@ -230,6 +230,14 @@ describe("Integration tests", () => {
 						expect(msg).toBe("Page Not Found");
 					});
 			});
+			test("GET:200 when given a limit of 0 endpoint should return all articles, post filtering", () => {
+				return request(app)
+					.get("/api/articles?limit=0")
+					.expect(200)
+					.then(({ body: { articles } }) => {
+						expect(articles.length).toBe(13)
+					});
+			});
 		});
 		describe("POST", () => {
 			test("POST:201 adds a new article and sends the posted article with a comment count back to the client", () => {

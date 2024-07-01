@@ -16,7 +16,7 @@
 			"topic": "filters results to only include those of the specified topic",
 			"sort_by": "sorts the results by the specified column, defaults to created_at",
 			"order": "accepts `asc` or `desc`, sorts the results in ascending or descending order, defaults to descending",
-			"limit" : "sets the number of articles per page, defaults to 10",
+			"limit" : "sets the number of articles per page, defaults to 10. A limit if 0 will return all filtered articles",
 			"p": "sets the page number to return based on the limit, defaults to 1"
 		},
 		"exampleResponse": {
