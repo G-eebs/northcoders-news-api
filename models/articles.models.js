@@ -17,7 +17,10 @@ exports.selectArticleById = (articleId) => {
 		});
 };
 
-exports.selectArticles = (topic, sortBy = "created_at", order = "desc") => {
+exports.selectArticles = (topic, sortBy = "created_at", order = "desc", limit = 10, p = 1) => {
+	limit = +limit
+	p = +p
+
 	const queries = [];
 
 	const validSortBys = [
@@ -54,7 +57,23 @@ exports.selectArticles = (topic, sortBy = "created_at", order = "desc") => {
 	sqlString += `GROUP BY articles.article_id
 	ORDER BY ${sortBy} ${order}`;
 
-	return db.query(sqlString, queries).then(({ rows }) => rows);
+	return db.query(sqlString, queries).then(({ rows }) => {
+		if (!Number.isInteger(limit) || limit < 0) {
+			return Promise.reject({ status: 400, msg: "Invalid Limit" });
+		}
+		if (!Number.isInteger(p) || p < 1) {
+			return Promise.reject({ status: 400, msg: "Invalid Page" });
+		}
+		const pages = Math.max(1, Math.ceil(rows.length / limit));
+		if (p > pages) {
+			return Promise.reject({ status: 404, msg: "Page Not Found" });
+		}
+
+		const articles = limit === 0 ? rows : rows.slice((p - 1) * limit, Math.min(p * limit, rows.length));
+		const total_count = rows.length;
+
+		return { articles, total_count };
+	});
 };
 
 exports.selectArticleComments = (articleId) => {
